@@ -1,7 +1,7 @@
 ---
-title: "Individual Project"
+title: "Predicting Flight Delays Based on Distance and Carrier"
 author: "Todd Sakai"
-date: 'Due Date: April 24, 2026'
+date: 'April 24, 2026'
 output:
   pdf_document: default
   html_document:
