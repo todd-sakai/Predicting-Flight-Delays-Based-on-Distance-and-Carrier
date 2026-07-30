@@ -1,4 +1,4 @@
-# Project 1: Predicting Flight Delays Based on Distance and Carrier
+# Predicting Flight Delays Based on Distance and Carrier
 
 ## Overview
 This project is a statistical analysis examining how flight distance and airline carrier (American Airlines vs. Delta Air Lines) influence the length of arrival delays for commercial domestic flights. Utilizing a dataset of nearly two million 2024 flights from the U.S. Bureau of Transportation Statistics, the study involves data exploration, hypothesis testing, and regression analysis in R to evaluate the reliability of each carrier and identify potential predictors for travel disruptions.
