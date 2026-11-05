@@ -1,10 +1,10 @@
 # Predicting Flight Delays Based on Distance and Carrier
 
-The project asks two questions about 1,993,500 domestic American Airlines and Delta Air Lines flights in 2024, using U.S. Bureau of Transportation Statistics data:
+This project answers two questions about 1,993,500 domestic American Airlines and Delta Air Lines flights in 2024, using U.S. Bureau of Transportation Statistics data:
 1. does flight distance predict arrival delay?
 2. Does one carrier have longer delays than the other?
 
-It uses summary statistics, simple linear regression with a slope test, and a Welch two-sample t-test, all in R. 29,538 flights have no recorded delay, because they were cancelled or diverted, and are left out of the delay calculations.
+I used summary statistics, simple linear regression with a slope test, and a Welch two-sample t-test, all in R.
 
 | Question | Result |
 |---|---|
@@ -13,5 +13,4 @@ It uses summary statistics, simple linear regression with a slope test, and a We
 
 Files:
 - `Predicting Flight Delays Based on Distance and Carrier.Rmd`: Code and text
-- `Predicting Flight Delays - Todd Sakai.pdf`: Report without code
 - `Research_Project_Dataset.csv`: The data, with columns Carrier, Delay in minutes, and Distance in miles
