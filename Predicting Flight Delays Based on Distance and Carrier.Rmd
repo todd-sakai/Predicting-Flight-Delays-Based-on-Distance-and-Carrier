@@ -1,48 +1,57 @@
 ---
 title: "Predicting Flight Delays Based on Distance and Carrier"
 author: "Todd Sakai"
+subtitle: "Individual research project, M 358K Applied Statistics, UT Austin"
 date: 'April 24, 2026'
 output:
   pdf_document: default
   html_document:
     df_print: paged
 ---
-<!-- The author of this template is Dr. Gordan Zitkovic.-->
-<!-- The code chunk below contains some settings that will  -->
-<!-- make your R code look better in the output pdf file.  -->
-<!-- If you are curious about what each option below does, -->
-<!-- go to https://yihui.org/knitr/options/ -->
-<!-- If not, feel free to disregard everything ...  -->
+<!-- Report template by Dr. Gordan Zitkovic. Code is hidden in the PDF; see the chunks below. -->
 ```{r echo=FALSE, warning=FALSE, include=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   fig.align="center",
   fig.pos="t",
-  strip.white = TRUE
+  strip.white = TRUE,
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  dev = "png",
+  dpi = 150,
+  fig.width = 7,
+  fig.height = 4.5,
+  out.width = "80%"
 )
 ```
-<!-- ... down to here. -->
 
 # Introduction
 
 \vspace*{10pt}
 
+### Key Results
+
+* **Carrier matters.** Across about 2 million 2024 flights, American Airlines arrived 15.3 minutes late on average and Delta Air Lines 3.7 minutes late. The 95% confidence interval for the difference is 11.5 to 11.8 minutes.
+* **Distance does not.** Distance explains less than 0.05% of the variation in delay (adjusted $R^2$ = 0.0005). The slope is statistically significant only because the sample is so large.
+* **Methods:** summary statistics, simple linear regression with a slope test and confidence interval, and a Welch two-sample t-test, all in R.
+
 ### Topic and Background Information
-The primary goal of this study is to examine how flight distance and airline carrier influence the length of delays for commercial domestic flights. The motivation for this research comes from my personal experience with a 12-hour flight delay from HNL to HOU. Through this project, I am to investigate possible factors that can help mitigate my amount of travel disruptions in the future. On top of that, I want to establish a history of mileage with a specific airline and since Delta Air Lines and American Airlines are two of the most popular carriers in the United States, this study aims to determine which is more reliable and experiences fewer delays.
+The primary goal of this study is to examine how flight distance and airline carrier influence the length of delays for commercial domestic flights. The motivation for this research comes from my personal experience with a 12-hour flight delay from HNL to HOU. Through this project, I aim to investigate possible factors that can help mitigate my amount of travel disruptions in the future. On top of that, I want to establish a history of mileage with a specific airline and since Delta Air Lines and American Airlines are two of the most popular carriers in the United States, this study aims to determine which is more reliable and experiences fewer delays.
 
 ### Dataset Description
-The data for this project was collected from the publicly available U.S. Bureau of Transportation Statistics (BTS) "Marketing Carrier On-Time Performance" database. The final dataset consists of 1,993,500 observations, representing domestic flights operated by American Airlines and Delta Air Lines throughout the year 2024. The individual sampling units are single, completed commercial flights. The dataset includes three variables that I have chose to analyze:
+The data for this project was collected from the publicly available U.S. Bureau of Transportation Statistics (BTS) "Marketing Carrier On-Time Performance" database. The final dataset consists of 1,993,500 observations, representing domestic flights operated by American Airlines and Delta Air Lines throughout the year 2024. The individual sampling units are single commercial flights. 29,538 flights (1.5%) have no recorded arrival delay, because they were cancelled or diverted, so they are left out of every delay calculation. The dataset includes three variables that I chose to analyze:
 
-```{r, echo=TRUE}
+```{r}
 library(readr)
 all_flights <- read_csv("Research_Project_Dataset.csv")
 head(all_flights)
 ```
 * **Categorical Explanatory Variable (Carrier)**: A binary categorical variable that can take on two possible values: AA (American Airlines) and DL (Delta Air Lines).
 
-* **Response Variable (Delay)**: A numeric variable representing each flights arrival delay in minutes.
+* **Response Variable (Delay)**: A numeric variable representing each flight's arrival delay in minutes.
 
-* **Numeric Explanatory Variable (Distance)**: A numeric variable representing each flights distance in miles.
+* **Numeric Explanatory Variable (Distance)**: A numeric variable representing each flight's distance in miles.
 
 ### Research Questions
 This analysis will attempt to answer the following research questions:
@@ -56,29 +65,29 @@ This analysis will attempt to answer the following research questions:
 \vspace*{10pt}
 
 ### Categorical Explanatory Variable Exploration (Carrier)
-To understand the overall distribution of our categorical explanatory variable, we use a grouped bar plot to visualize proportion of flights operate by both carriers, as well as a proportion table to calculate the exact proportion percentage per group.
+To understand the overall distribution of our categorical explanatory variable, we use a bar plot to visualize the number of flights operated by each carrier, as well as a proportion table to calculate the exact proportion percentage per group.
 
-```{r, echo=TRUE}
+```{r}
 barplot(table(all_flights$Carrier), main="Sample by Airline", ylab="Count", col=c("steelblue","firebrick"))
 ```
 
-```{r, echo=TRUE}
+```{r}
 prop.table(table(all_flights$Carrier))
 ```
 
-After calculating proportion percentage by carrier, we can see that around 49.37% of the flights in our data was operated by American Airlines and around 50.62% was operated by Delta Airlines.
+After calculating proportion percentage by carrier, we can see that around 49.37% of the flights in our data were operated by American Airlines and around 50.62% were operated by Delta Air Lines.
 
 ### Response Variable Exploration (Delay)
 To understand the overall distribution of our response variable, we use a histogram to visualize the distribution of flight delay frequencies, as well as the appropriate summary statistics to best describe the center and spread.
 
-```{r, echo=TRUE}
+```{r}
 hist(all_flights$Delay,
      xlim=c(-91, 3803),
      main="Distribution of Flight Delays",
      xlab="Minutes")
 ```
 
-```{r, echo=TRUE}
+```{r}
 cat("Mean Flight Delay:", mean(all_flights$Delay, na.rm = TRUE), "minutes", "\n")
 cat("Median Flight Delay:", median(all_flights$Delay, na.rm = TRUE), "minutes", "\n")
 cat("Flight Delay Standard Deviation:", sd(all_flights$Delay, na.rm = TRUE), "minutes","\n")
@@ -90,20 +99,20 @@ After visualizing the distribution of flight delay frequencies, we see the distr
 ### Numeric Explanatory Variable Exploration (Distance)
 To understand the overall distribution of our numeric explanatory variable, we use a histogram to visualize the distribution of flight distance frequencies, as well as the appropriate summary statistics to best describe the center and spread.
 
-```{r, echo=TRUE}
+```{r}
 hist(all_flights$Distance,
      main="Flight Distances",
      xlab="Miles")
 ```
 
-```{r, echo=TRUE}
+```{r}
 cat("Mean Flight Distance:", mean(all_flights$Distance, na.rm = TRUE), "miles", "\n")
 cat("Median Flight Distance:", median(all_flights$Distance, na.rm = TRUE), "miles", "\n")
 cat("Flight Distance Standard Deviation:", sd(all_flights$Distance, na.rm = TRUE), "miles", "\n")
 cat("Flight Distance IQR:", IQR(all_flights$Distance, na.rm = TRUE), "miles", "\n")
 ```
 
-After visualizing the distribution of flight distance frequencies, we see the distirbution is skewed to the right. Consequently, the median (814 miles) and IQR (741 miles) most appropriately describe the center and spread.
+After visualizing the distribution of flight distance frequencies, we see the distribution is skewed to the right. Consequently, the median (814 miles) and IQR (741 miles) most appropriately describe the center and spread.
 
 # Analysis
 
@@ -112,7 +121,7 @@ After visualizing the distribution of flight distance frequencies, we see the di
 ### Bivariate Analysis (Delay vs. Distance)
 To investigate whether flight distance is a predictor of delay, I made a scatterplot with Flight Distance (in miles) on the x-axis and Delay (in minutes) on the y-axis. 
 
-```{r, echo=TRUE}
+```{r}
 plot(all_flights$Distance,
      all_flights$Delay,
      main="Flight Distances and Delays",
@@ -122,7 +131,7 @@ plot(all_flights$Distance,
 
 Visually, on the scatterplot you can see a 'funnel' effect; as the flight distance increases, the vertical spread (variance) of arrival delays appears to shrink. While shorter flights exhibit a massive range of delay outcomes, longer flights show a much tighter clustering of data points.
 
-```{r, echo=TRUE}
+```{r}
 cat("Correlation Coefficient:", cor(all_flights$Distance, all_flights$Delay, use = "complete.obs"))
 ```
 
@@ -134,7 +143,7 @@ To determine if flight distance is a significant predictor of delays, a simple l
 * **Hypothesis Test:** A hypothesis test for the slope ($\beta_1$) of the regression line will be performed to test the null hypothesis ($H_0: \beta_1 = 0$) that there is no linear relationship between distance and delay, against the alternative hypothesis ($H_A: \beta_1 \neq 0$). 
 * **Confidence Interval:** A 95% confidence interval for the true population slope will also be constructed to estimate the expected change in delay minutes for every additional mile of flight distance.
 
-```{r, echo=TRUE}
+```{r}
 # Fit the Simple Linear Regression Model
 delay_model <- lm(Delay ~ Distance, data = all_flights)
 
@@ -146,12 +155,12 @@ confint(delay_model, level = 0.95)
 ```
 
 ### Interpretation:
-With a p-value of < 2.2e-16 (Basically 0), we reject the null hypothesis and conclude that there is a statistically significant linear relationship between flight distance and arrival delay. We are 95% confident that for every additional mile flown, the expected arrival delay actually decreases by between 0.0023 and 0.0026 minutes.
+With a p-value of < 2.2e-16 (essentially zero), we reject the null hypothesis and conclude that there is a statistically significant linear relationship between flight distance and arrival delay. We are 95% confident that for every additional mile flown, the expected arrival delay actually decreases by between 0.0023 and 0.0026 minutes.
 
 ### Bivariate Analysis (Delay vs. Carrier)
 To address the research question regarding the reliability of the two carriers, side-by-side boxplots were constructed to compare the delays of American Airlines and Delta Air Lines. 
 
-```{r, echo=TRUE}
+```{r}
 boxplot(Delay ~ Carrier,
         data=all_flights,
         outline=FALSE,
@@ -160,14 +169,14 @@ boxplot(Delay ~ Carrier,
         col=c("steelblue","firebrick"))
 ```
 
-```{r, echo=TRUE}
+```{r}
 cat("AA Average Delay:", mean(all_flights$Delay[all_flights$Carrier == "AA"], na.rm = TRUE), "\n")
 cat("AA Delay SD:", sd(all_flights$Delay[all_flights$Carrier == "AA"], na.rm = TRUE), "\n")
 cat("DL Average Delay:", mean(all_flights$Delay[all_flights$Carrier == "DL"], na.rm = TRUE), "\n")
 cat("DL Delay SD:", sd(all_flights$Delay[all_flights$Carrier == "DL"], na.rm = TRUE), "\n")
 ```
 
-Calculating the appropriate grouped summary statistics, we can see that our sample of American Airlines Flights has an average delay of around 15 minutes, and a standard deviation of 84 minutes. On the other hand, our sample of Delta Airlines Flights has an average delay of around 3 minutes, and a standard deviation of 53 minutes.
+Calculating the appropriate grouped summary statistics, we can see that our sample of American Airlines flights has an average delay of around 15.3 minutes, and a standard deviation of 84 minutes. On the other hand, our sample of Delta Air Lines flights has an average delay of around 3.7 minutes, and a standard deviation of 53 minutes.
 
 ### Confidence Intervals & Hypothesis Testing (Delay vs. Carrier)
 To compare the reliability of the two carriers, an independent two-sample t-test will be utilized to analyze the difference in mean delays between American Airlines ($\mu_{AA}$) and Delta Air Lines ($\mu_{DL}$).
@@ -175,12 +184,12 @@ To compare the reliability of the two carriers, an independent two-sample t-test
 * **Hypothesis Test:** The null hypothesis ($H_0: \mu_{AA} - \mu_{DL} = 0$) states there is no difference in true mean delays, while the alternative hypothesis ($H_A: \mu_{AA} - \mu_{DL} \neq 0$) states there is a significant difference.
 * **Confidence Interval:** A 95% confidence interval for the difference in population means ($\mu_{AA} - \mu_{DL}$) will be calculated to estimate the magnitude of the difference in delay times between the two airlines.
 
-```{r, echo=TRUE}
+```{r}
 t.test(Delay ~ Carrier, data = all_flights, conf.level = 0.95)
 ```
 
 ### Interpretation:
-Since the p-value is < 2.2e-16 (Basically 0), we reject the null hypothesis and conclude there is a statistically significant difference in mean arrival delays between American Airlines and Delta Air Lines. We are 95% confident that the true mean arrival delay for American Airlines is between 11.45 and 11.85 minutes longer than Delta Air Lines.
+Since the p-value is < 2.2e-16 (essentially zero), we reject the null hypothesis and conclude there is a statistically significant difference in mean arrival delays between American Airlines and Delta Air Lines. We are 95% confident that the true mean arrival delay for American Airlines is between 11.45 and 11.85 minutes longer than Delta Air Lines.
 
 # Conclusion
 
@@ -191,9 +200,9 @@ The purpose of this project was to analyze commercial domestic flight data from 
 
 * **Does the total distance of a flight in miles predict the length of its arrival delay in minutes? (RQ1):** While our linear regression model found a statistically significant relationship ($p < 2.2 \times 10^{-16}$), the practical takeaway is that distance is a poor predictor of how late you will be. With an Adjusted R-squared of 0.0004899, distance explains less than 0.05% of the variance in flight delays. Interestingly, the model actually suggests that for every additional 1,000 miles flown, arrival delay decreases by about 2.5 minutes. Visually, our analysis showed that while short flights have a massive "spread" of delays, longer flights actually tend to be more consistent. Ultimately, this tells us that travel disruptions are likely driven by other confounding variables such as airport congestion, weather, or airline operations rather than the physical distance.
 
-* **Is there a significant difference in the delay in minutes between American Airlines and Delta Air Lines? (RQ2):** The two-sample t-test revealed a statistically significant and practically meaningful difference in reliability between the two carriers. While Delta Air Lines maintained a remarkably low average delay of only 3.66 minutes, American Airlines averaged over 15.31 minutes per flight. In practical terms, our 95% confidence interval shows that choosing American Airlines typically costs a traveler an extra 11.5 to 11.8 minutes of wait time per flight compared to Delta. For a frequent flyer or someone making a tight connection, this 318% increase in average delay time makes Delta the significantly more reliable choice for minimizing travel disruptions.
+* **Is there a significant difference in the delay in minutes between American Airlines and Delta Air Lines? (RQ2):** The two-sample t-test revealed a statistically significant and practically meaningful difference in reliability between the two carriers. While Delta Air Lines maintained a remarkably low average delay of only 3.66 minutes, American Airlines averaged 15.31 minutes per flight. In practical terms, our 95% confidence interval shows that choosing American Airlines typically costs a traveler an extra 11.5 to 11.8 minutes of wait time per flight compared to Delta. For a frequent flyer or someone making a tight connection, this 318% increase in average delay time makes Delta the significantly more reliable choice for minimizing travel disruptions.
 
 ### Limitations
-While the findings provide valuable insight into on-time performance, this analysis has several limitations. First, the simple linear regression model only considers flight distance as a predictor, ignoring major confounding variables such as severe weather events, seasonal holiday travel surges, and the specific departure or arrival airports. Additionally, the extreme right skew of the delay data, caused by severe outliers can heavily influence the sample mean and the results of the two-sample t-test. 
+While the findings provide valuable insight into on-time performance, this analysis has several limitations. First, the simple linear regression model only considers flight distance as a predictor, ignoring major confounding variables such as severe weather events, seasonal holiday travel surges, and the specific departure or arrival airports. Additionally, the extreme right skew of the delay data, caused by severe outliers, can heavily influence the sample mean and the results of the two-sample t-test. 
 
-A potential improvement for future statistical analysis would be to factor in more variables into the multiple linear regression model, such as weather conditions, departure time, or the month of travel. Furthermore, a potential improvement could also be applying data transformations to better account for the severe skewness and extreme outliers.
+A potential improvement for future statistical analysis would be to factor in more variables into a multiple linear regression model, such as weather conditions, departure time, or the month of travel. Furthermore, a potential improvement could also be applying data transformations to better account for the severe skewness and extreme outliers.
