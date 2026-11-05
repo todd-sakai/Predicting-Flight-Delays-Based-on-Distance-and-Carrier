@@ -26,6 +26,6 @@ I used summary statistics, simple linear regression with a slope test, and a Wel
 - Base R `stats` and `graphics`: `lm`, `confint`, `t.test`, `hist`, `boxplot` and `plot`
 - `rmarkdown` and `knitr`: building the PDF report
 
-Files: `Predicting Flight Delays Based on Distance and Carrier.Rmd` (code and text), `Predicting Flight Delays - Todd Sakai.pdf` (report without code) and `Research_Project_Dataset.csv` (the data, with columns Carrier, Delay in minutes, and Distance in miles). 29,538 flights have no recorded delay, because they were cancelled or diverted, and are left out of the delay calculations.
-
-To rebuild the PDF, open the `.Rmd` in RStudio and click Knit. It needs R with the `rmarkdown`, `knitr` and `readr` packages, and a LaTeX installation.
+Files:
+- `Predicting Flight Delays Based on Distance and Carrier.Rmd`: Code and text
+- `Research_Project_Dataset.csv`: The data, with columns Carrier, Delay in minutes, and Distance in miles
