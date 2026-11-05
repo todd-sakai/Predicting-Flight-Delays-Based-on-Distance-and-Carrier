@@ -1,7 +1,5 @@
 # Predicting Flight Delays Based on Distance and Carrier
 
-Individual research project for M 358K Applied Statistics (UT Austin, Spring 2026), by Todd Sakai.
-
 The project asks two questions about 1,993,500 domestic American Airlines and Delta Air Lines flights in 2024, using U.S. Bureau of Transportation Statistics data: does flight distance predict arrival delay, and does one carrier have longer delays than the other? It uses summary statistics, simple linear regression with a slope test, and a Welch two-sample t-test, all in R.
 
 | Question | Result |
